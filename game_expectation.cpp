@@ -78,6 +78,7 @@ double f(State S) {
       ans = min(ans, foo);
     }
   }
+  if(ans == HUGE_VAL || ans == -HUGE_VAL) ans = 0;
   //S.printState();
   //printf("%.10lf\n\n\n", ans);
   return memo[S] = ans;
