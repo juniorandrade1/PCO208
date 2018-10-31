@@ -20,7 +20,7 @@ struct State {
     for(int i = 0; i < st.size(); ++i) printf(" %d", st[i]);
     printf("\n");
   }
-};
+};  
 
 const int N = (int)5; //Maximum number of piles
 const int M = (int)5; //Maximum number of different times
@@ -42,7 +42,6 @@ double f(State S) {
     ans = -HUGE_VAL;
     for(int i = 0; i < n; ++i) { //choose action that maximize
       if(S.st[i] == h[i]) continue;
-      double foo = 0;
       double probSum = 0;
       for(int j = 0; j < t; ++j) {
         probSum += q[i][j];
@@ -52,16 +51,14 @@ double f(State S) {
         Swin.st[i]++;
         if(Swin.st[i] == h[i]) rwin += br[i];
         double ax = (1.0 - probSum) * (f(Swin) + rwin) + probSum * (f(SLose) + rlose);
-        foo += ax;
+        ans = max(ans, ax);
       }
-      ans = max(ans, foo);
     }
   }
   else {
     ans = HUGE_VAL;
     for(int i = 0; i < n; ++i) { //choose action that minimize
       if(S.st[i] == h[i]) continue;
-      double foo = 0;
       double probSum = 0;
       for(int j = 0; j < t; ++j) {
         probSum += q[i][j];
@@ -72,10 +69,9 @@ double f(State S) {
         if(Swin.st[i] == h[i]) rwin += br[i];
         Swin.tu++;
         SLose.tu++;
-        double ax = (1.0 - probSum) * (f(Swin) - rwin) + probSum * (f(SLose) - rlose);
-        foo += ax;
+        double ax = (1.0 - probSum) * (f(Swin) - rwin) + probSum * (f(SLose) - rlose);  
+        ans = min(ans, ax);
       }
-      ans = min(ans, foo);
     }
   }
   if(ans == HUGE_VAL || ans == -HUGE_VAL) ans = 0;
@@ -102,7 +98,6 @@ int main() {
   atual.pl = atual.tu = 0; atual.st = vector< int >(n, 0);
   double s = f(atual);
   printf("%.10lf\n", s);
-
   /*
   for(int i = 0; i < turn; ++i) {
 
