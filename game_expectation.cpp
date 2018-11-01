@@ -75,33 +75,105 @@ double f(State S) {
     }
   }
   if(ans == HUGE_VAL || ans == -HUGE_VAL) ans = 0;
-  //S.printState();
-  //printf("%.10lf\n\n\n", ans);
   return memo[S] = ans;
 }
 
+void getOptimalPlay(State S) {
+  //base case
+  if(S.tu == m) return;
+  double ans = f(S);
+  if(S.pl == 0) {
+    for(int i = 0; i < n; ++i) { //choose action that maximize
+      if(S.st[i] == h[i]) continue;
+      double probSum = 0;
+      for(int j = 0; j < t; ++j) {
+        probSum += q[i][j];
+        State Swin = S; Swin.pl ^= 1;
+        State SLose = S; SLose.pl ^= 1;
+        double rwin = r[i][j], rlose = r[i][j];
+        Swin.st[i]++;
+        if(Swin.st[i] == h[i]) rwin += br[i];
+        double ax = (1.0 - probSum) * (f(Swin) + rwin) + probSum * (f(SLose) + rlose);
+        if(ans == ax) {
+          printf("Optimal play is insert at pile %d at time %d and get a expected reward %.10lf\n", i, j, ans);
+          return;
+        }
+      }
+    }
+  }
+  else {
+    for(int i = 0; i < n; ++i) { //choose action that minimize
+      if(S.st[i] == h[i]) continue;
+      double probSum = 0;
+      for(int j = 0; j < t; ++j) {
+        probSum += q[i][j];
+        State Swin = S; Swin.pl ^= 1;
+        State SLose = S; SLose.pl ^= 1;
+        double rwin = r[i][j], rlose = r[i][j];
+        Swin.st[i]++;
+        if(Swin.st[i] == h[i]) rwin += br[i];
+        Swin.tu++;
+        SLose.tu++;
+        double ax = (1.0 - probSum) * (f(Swin) - rwin) + probSum * (f(SLose) - rlose);  
+        if(ans == ax) {
+          printf("Optimal play is insert at pile %d at time %d and get a expected reward %.10lf\n", i, j, ans);
+          return;
+        }
+      }
+    }
+  }
+  if(ans == HUGE_VAL || ans == -HUGE_VAL) ans = 0;
+  return;
+}
+
 int main() {
-  scanf("%d %d %d", &n, &t, &m);
-  for(int i = 0; i < n; ++i) scanf("%d", h + i); // read size
-  for(int i = 0; i < n; ++i) scanf("%lf", br + i); // read bonus
+  FILE *file = fopen("parameters.in", "r");
+  fscanf(file, "%d %d %d", &n, &t, &m);
+  for(int i = 0; i < n; ++i) fscanf(file, "%d", h + i); // read size
+  for(int i = 0; i < n; ++i) fscanf(file, "%lf", br + i); // read bonus
   for(int i = 0; i < n; ++i) {
     for(int j = 0; j < t; ++j) {
-      scanf(" %lf", &r[i][j]); //read reward
+      fscanf(file, " %lf", &r[i][j]); //read reward
     }
   }
   for(int i = 0; i < n; ++i) {
     for(int j = 0; j < t; ++j) {
-      scanf(" %lf", &q[i][j]); //read probability
+      fscanf(file, " %lf", &q[i][j]); //read probability
     }
   }
+  puts("-----------------------------------------------------");
+  printf("Number of piles: %d\n", n);
+  printf("Number of different times: %d\n", t);
+  printf("Number of turns: %d\n", m);
+  puts("-----------------------------------------------------");
+  printf("h[i] = {");
+  for(int i = 0; i < n; ++i) printf(" %d", h[i]);
+  printf(" }\n");
+  puts("-----------------------------------------------------");
+  printf("r_ij\n");
+  for(int i = 0; i < n; ++i) {
+    for(int j = 0; j < t; ++j) {
+      printf("%lf ", r[i][j]); //read reward
+    }
+    printf("\n");
+  }
+  puts("-----------------------------------------------------");
+  printf("p_ij\n");
+  for(int i = 0; i < n; ++i) {
+    for(int j = 0; j < t; ++j) {
+      printf("%lf ", q[i][j]); //read probability
+    }
+    printf("\n");
+  }
+  puts("-----------------------------------------------------");
   State atual;
   atual.pl = atual.tu = 0; atual.st = vector< int >(n, 0);
   double s = f(atual);
-  printf("%.10lf\n", s);
-  /*
-  for(int i = 0; i < turn; ++i) {
-
+  //printf("Expected reward = %.10lf\n", s);
+  getOptimalPlay(atual);
+  for(int i = 0; i < m; ++i) {
+    printf("Insert a new pile: ");
+    int x, y; scanf("%d %d", &x, &y);
   }
-  */
   return 0;
 }
