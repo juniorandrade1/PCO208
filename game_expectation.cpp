@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <random>
 
 using namespace std;
 
@@ -30,6 +31,7 @@ int h[N]; //h[i] = length of pile i;
 double r[N][M]; //r[i][j] = reward to insert a stone on pile i using j seconds;
 double br[N]; //br[i] = bonus reward to fill the i-th pile;
 double q[N][M]; //q[i][j] = probability of lose a stone in pile i spend j seconds; the sum of each row in this matrix must be less or equal to 1.0
+double sq[N][M];
 
 map< State, double > memo;
 
@@ -128,6 +130,10 @@ pair<int, int> getOptimalPlay(State S) {
 }
 
 int main() {
+  random_device rd;
+  mt19937 e2(rd());
+  uniform_real_distribution<> dist(0, 1);
+
   FILE *file = fopen("parameters.in", "r");
   fscanf(file, "%d %d %d", &n, &t, &m);
   for(int i = 0; i < n; ++i) fscanf(file, "%d", h + i); // read size
@@ -140,6 +146,8 @@ int main() {
   for(int i = 0; i < n; ++i) {
     for(int j = 0; j < t; ++j) {
       fscanf(file, " %lf", &q[i][j]); //read probability
+      sq[i][j] = q[i][j];
+      if(j) sq[i][j] += sq[i][j - 1];
     }
   }
   puts("-----------------------------------------------------");
@@ -175,13 +183,13 @@ int main() {
   for(int i = 0; i < m; ++i) {
     printf("Insert a new pile: ");
     int x, y; scanf("%d %d", &x, &y);
-    atual.st[x]++;
+    if(dist(e2) >= sq[x][y]) atual.st[x]++;
     ra += r[x][y];
     if(atual.st[x] == h[x]) ra += br[x];
     atual.pl ^= 1;
     pair<int, int> o = getOptimalPlay(atual);
     printf("The second player plays %d %d\n", o.first, o.second);
-    atual.st[o.first]++;
+    if(dist(e2) >= sq[o.first][o.second]) atual.st[o.first]++;
     rb += r[o.first][o.second];
     if(atual.st[o.first] == h[o.first]) rb += br[o.first];
     atual.tu++;

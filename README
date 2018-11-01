@@ -1,7 +1,7 @@
-This code is implemented in c++. 
+This code is implemented in c++11;
 
 To compile in linux using the follow command line on file directory
 
-g++ game_expectation.cpp && ./a.out
+g++ -std=c+11 game_expectation.cpp && ./a.out
 
 The appliction will show the game parameters. After that, the first player will make a move, and the second player (computer) will play using the maximum expected reward action
