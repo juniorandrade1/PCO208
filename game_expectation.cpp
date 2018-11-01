@@ -78,9 +78,11 @@ double f(State S) {
   return memo[S] = ans;
 }
 
-void getOptimalPlay(State S) {
+
+
+pair<int, int> getOptimalPlay(State S) {
   //base case
-  if(S.tu == m) return;
+  if(S.tu == m) return make_pair(-1, -1);
   double ans = f(S);
   if(S.pl == 0) {
     for(int i = 0; i < n; ++i) { //choose action that maximize
@@ -96,7 +98,7 @@ void getOptimalPlay(State S) {
         double ax = (1.0 - probSum) * (f(Swin) + rwin) + probSum * (f(SLose) + rlose);
         if(ans == ax) {
           printf("Optimal play is insert at pile %d at time %d and get a expected reward %.10lf\n", i, j, ans);
-          return;
+          return make_pair(i, j);
         }
       }
     }
@@ -116,14 +118,13 @@ void getOptimalPlay(State S) {
         SLose.tu++;
         double ax = (1.0 - probSum) * (f(Swin) - rwin) + probSum * (f(SLose) - rlose);  
         if(ans == ax) {
-          printf("Optimal play is insert at pile %d at time %d and get a expected reward %.10lf\n", i, j, ans);
-          return;
+          printf("Optimal play is insert at pile %d at time %d and get a expected reward %.10lf\n\n", i, j, ans);
+          return make_pair(i, j);
         }
       }
     }
   }
-  if(ans == HUGE_VAL || ans == -HUGE_VAL) ans = 0;
-  return;
+  return make_pair(-1, -1);
 }
 
 int main() {
@@ -168,12 +169,24 @@ int main() {
   puts("-----------------------------------------------------");
   State atual;
   atual.pl = atual.tu = 0; atual.st = vector< int >(n, 0);
-  double s = f(atual);
+  //double s = f(atual);
   //printf("Expected reward = %.10lf\n", s);
-  getOptimalPlay(atual);
+  double ra = 0, rb = 0;
   for(int i = 0; i < m; ++i) {
     printf("Insert a new pile: ");
     int x, y; scanf("%d %d", &x, &y);
+    atual.st[x]++;
+    ra += r[x][y];
+    if(atual.st[x] == h[x]) ra += br[x];
+    atual.pl ^= 1;
+    pair<int, int> o = getOptimalPlay(atual);
+    printf("The second player plays %d %d\n", o.first, o.second);
+    atual.st[o.first]++;
+    rb += r[o.first][o.second];
+    if(atual.st[o.first] == h[o.first]) rb += br[o.first];
+    atual.tu++;
+    atual.pl ^= 1;
   }
+  printf("Final pontuation = %.10lf %.10lf\n", ra, rb);
   return 0;
 }
